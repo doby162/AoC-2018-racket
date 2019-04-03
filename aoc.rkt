@@ -48,7 +48,7 @@
                 codes)
            ) codes) (display first) (display second) (list first second)))
 
-(define debug #f)
+(define debug #t)
 (define (prtln x)
   (when debug
   (display "\n")
@@ -61,3 +61,33 @@
            (when (equal? a (list-ref y i)) (set! tally (+ 1 tally)))
            (set! i (+ 1 i))) x)
       )(equal? tally goal)))
+
+(define (star5 input)
+  (let ([hash make-hash][codes (string-split input "\n")])
+    {map (lambda (code)
+           (let* ([tokens (string-split code)][offsets (substring (list-ref tokens 2) 0 (- (string-length (list-ref tokens 2)) 1)) ][dimensions (list-ref tokens 3)])
+             (prtln offsets)
+             (prtln dimensions)
+             (let ([xoffset (string->number (list-ref (string-split offsets ",") 0))]
+                   [yoffset (string->number (list-ref (string-split offsets ",") 1))]
+                   [xsize (string->number (list-ref (string-split dimensions "x") 0))]
+                   [ysize (string->number (list-ref (string-split dimensions "x") 1))])
+               (prtln xoffset)
+               (prtln yoffset)
+               (prtln xsize)
+               (prtln ysize)
+
+               
+               
+               (prtln (+ xsize ysize))
+               
+               ))) codes}
+    ))
+
+
+;use filter on hash?
+        
+(star5 "#1 @ 1,3: 4x4
+#2 @ 3,1: 4x4
+#3 @ 5,5: 2x2")
+  
