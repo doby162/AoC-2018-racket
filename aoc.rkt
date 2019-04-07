@@ -63,31 +63,32 @@
       )(equal? tally goal)))
 
 (define (star5 input)
-  (let ([hash make-hash][codes (string-split input "\n")])
+  (let ([hash (make-hash)][codes (string-split input "\n")])
     {map (lambda (code)
            (let* ([tokens (string-split code)][offsets (substring (list-ref tokens 2) 0 (- (string-length (list-ref tokens 2)) 1)) ][dimensions (list-ref tokens 3)])
-             (prtln offsets)
-             (prtln dimensions)
              (let ([xoffset (string->number (list-ref (string-split offsets ",") 0))]
                    [yoffset (string->number (list-ref (string-split offsets ",") 1))]
                    [xsize (string->number (list-ref (string-split dimensions "x") 0))]
                    [ysize (string->number (list-ref (string-split dimensions "x") 1))])
-               (prtln xoffset)
-               (prtln yoffset)
-               (prtln xsize)
-               (prtln ysize)
-
-               
-               
-               (prtln (+ xsize ysize))
-               
+               (mark-coords-hash (add-offset-to-coords xoffset yoffset (list-rect xsize ysize)) hash)
                ))) codes}
-    ))
+    (count (lambda (x) (values x))(hash-map hash (lambda (key value) (> value 1))))))
+(define (list-rect width height)
+  (let ([tot (* width height)])
+    (build-list tot (lambda (x)
+                                 (cons
+                                  (modulo x width)
+                                  (quotient x width))))))
+(define (add-offset-to-coords x y coords)
+  (map (lambda (coord) (cons (+ x (car coord)) (+ y (cdr coord)))) coords))
+(define (mark-coords-hash coords hash)
+  (map (lambda (coord) (hash-set! hash coord (+ 1 (hash-ref hash coord 0)))) coords))
+    
 
 
 ;use filter on hash?
         
 (star5 "#1 @ 1,3: 4x4
 #2 @ 3,1: 4x4
-#3 @ 5,5: 2x2")
+#3 @ 5,5: 2x2") ; outputs 4
   
