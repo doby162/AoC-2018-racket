@@ -20,7 +20,7 @@
 ;and create a record
 (define (read-record file pointer)
   (set! records (append records (list
-                                 (record (reader 1) (reader 4) (reader 8) (reader 1) (reader 7))))))
+                                 (record (reader 1) (reader 4) (reader 8) (reader 8))))))
 ;display a record
 (define (inspect n)
   (let ([element (list-ref records n)])
@@ -39,3 +39,12 @@
 ;steps
 (read-record in pointer)
 (inspect 0)
+
+;turn decimal numbers into a string of bits for twiddling with
+(define (int->bits dec [top true])
+  (let([bin-buffer (list)])
+    (when (> dec 0)    
+      (set! bin-buffer (append bin-buffer (list (modulo dec 2))))
+      (set! bin-buffer (append bin-buffer (int->bits (floor (/ dec 2)) false))))
+    (when top (set! bin-buffer (reverse bin-buffer)))
+    bin-buffer))
