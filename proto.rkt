@@ -28,32 +28,34 @@
 ;and create a record
 (define (read-record file pointer)
   (set! records (append records (list
-                                 (record (reader 1) (reader 4) (reader 8) (int->bits (reader 8)))))))
+                                 (record (reader 1) (reader 4) (reader 8) (bitlist->float (int->bits (reader 8))))))))
 ;display a record
 (define (inspect n)
   (let ([element (list-ref records n)])
     (fprintf (current-output-port) "type:~a~ntimestamp:~a~nuser-id:~a~ndollar-amount:~a~n"
              (record-type element)(record-timestamp element)(record-user-id element)(record-dollar-amount element))))
-    
-;process the header
-(define name (subbytes in 0 4))
-(define version (bytes->int (subbytes in 4 5)))
-(define record-num (bytes->int (subbytes in 5 9)))
-(define pointer 9)
-
-
-
-;bytes-ref
-;steps
-(read-record in pointer)
-(inspect 0)
-
+;similar to reading bytes from a file, but works for arbitrary lists of bits
 (define (bitlist->int bitlist)
   (let ([value 0] [bits (reverse bitlist)])
     (map (lambda (bit)
            (set! value (* 2 value))
            (set! value (+ bit value))) bits) value))
+;trim both edges off of a list.
+(define (list-section list beg distance)
+  (list-tail (reverse (list-tail (reverse list)  (- (length list) distance beg)  )) beg))
+;simulate a hardware float64
+(define (bitlist->float bitlist)
+  (let ([sign (list-ref bitlist 0)] [exp (bitlist->int (list-section bitlist 1 11))] [num (bitlist->int (list-tail bitlist 11))] )
+    (fprintf (current-output-port) "sign: ~a~nexp: ~a~nint: ~a~n" sign exp num)))
 
 
-;(bitlist->int (record-dollar-amount (list-ref records 0)))
-;10011100001111
+;process the header and calibrate the pointer
+(define name (subbytes in 0 4))
+(define version (bytes->int (subbytes in 4 5)))
+(define record-num (bytes->int (subbytes in 5 9)))
+(define pointer 9)
+
+;steps
+(read-record in pointer)
+(inspect 0)
+
