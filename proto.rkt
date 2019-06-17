@@ -14,6 +14,10 @@
   (let ([value (bytes->int (subbytes in pointer (+ pointer length)))])
     (set! pointer (+ pointer length))
     value))
+;make a bitlist an exact number of bytes
+(define (pad-bitlist bits)
+  (let ([add (- 8 (modulo (length bits) 8))])
+    (when (not (= 8 add)) (set! bits (append (make-list add 0) bits))) bits))
 ;turn decimal numbers into a string of bits for twiddling with
 (define (int->bits dec [top true])
   (let([bin-buffer (list)])
