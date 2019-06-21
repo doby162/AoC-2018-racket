@@ -48,11 +48,12 @@
 (define (list-section list beg distance)
   (list-tail (reverse (list-tail (reverse list)  (- (length list) distance beg))) beg))
 ;simulate a hardware float64
+(define exponent-bias 1023)
 (define (bitlist->float bitlist)
-  (let ([sign (list-ref bitlist 0)] [exp (bitlist->int (list-section bitlist 1 11))] [num (bitlist->int (list-tail bitlist 12))] );604
+  (let ([sign (list-ref bitlist 0)] [exp (bitlist->int (list-section bitlist 1 11))] [num (list-tail bitlist 12)] )
     (fprintf (current-output-port) "sign: ~a~nexp: ~a~nint: ~a~n" sign exp num)
+    (* (expt 2 (- exp exponent-bias)) (string->number (string-append* "1." (map number->string num)) 2))
     ))
-
 
 ;process the header and calibrate the pointer
 (define name (subbytes in 0 4))
