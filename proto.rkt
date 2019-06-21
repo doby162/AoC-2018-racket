@@ -63,5 +63,8 @@
 (define pointer 9)
 
 ;steps
-(read-record in pointer)
-;(inspect 0)
+(fprintf (current-output-port) "Name: ~a~nVersion: ~a~nRecords: ~a~n" name version record-num)
+(define (read-all [n 0]) (when (< n record-num) (read-record in pointer) (read-all (+ 1 n))))
+(read-all)
+;(inspect 0) inspect specific records  
+
