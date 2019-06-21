@@ -24,8 +24,8 @@
     (when (> dec 0)    
       (set! bin-buffer (append bin-buffer (list (modulo dec 2))))
       (set! bin-buffer (append bin-buffer (int->bits (floor (/ dec 2)) false))))
-    (when top (set! bin-buffer (reverse bin-buffer)))
-    (pad-bitlist bin-buffer)))
+    (when top (set! bin-buffer (pad-bitlist (reverse bin-buffer))))
+    bin-buffer))
 ;define a record
 (struct record (type timestamp user-id dollar-amount))
 (define records (list))
@@ -49,16 +49,15 @@
   (list-tail (reverse (list-tail (reverse list)  (- (length list) distance beg))) beg))
 ;simulate a hardware float64
 (define (bitlist->float bitlist)
-  (println (length bitlist))
-;  (fprintf (current-output-port) "~n~nbyte1 ~a~nbyte2 ~a~nbyte3 ~a~nbyte4 ~a~nbyte5 ~a~nbyte6 ~a~nbyte7 ~a~nbyte8 ~a~n~n"
-;           (list-section bitlist 0 8)
-;           (list-section bitlist 8 8)
-;           (list-section bitlist 16 8)
-;           (list-section bitlist 24 8)
-;           (list-section bitlist 32 8)
-;           (list-section bitlist 40 8)
-;           (list-section bitlist 48 8)
-;           (list-section bitlist 52 8))
+  (fprintf (current-output-port) "~n~nbyte1 ~a~nbyte2 ~a~nbyte3 ~a~nbyte4 ~a~nbyte5 ~a~nbyte6 ~a~nbyte7 ~a~nbyte8 ~a~n~n"
+           (list-section bitlist 0 8)
+           (list-section bitlist 8 8)
+           (list-section bitlist 16 8)
+           (list-section bitlist 24 8)
+           (list-section bitlist 32 8)
+           (list-section bitlist 40 8)
+           (list-section bitlist 48 8)
+           (list-section bitlist 52 8))
   (let ([sign (list-ref bitlist 0)] [exp (bitlist->int (list-section bitlist 1 11))] [num (bitlist->int (list-tail bitlist 32))] );604
     (fprintf (current-output-port) "sign: ~a~nexp: ~a~nint: ~a~n" sign exp num)
     ))
@@ -73,4 +72,3 @@
 ;steps
 (read-record in pointer)
 (inspect 0)
-
