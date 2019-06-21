@@ -37,10 +37,12 @@
                                          (when (or (= type 0) (= type 1)) (bitlist->float (int->bits (reader 8))))))))
     (inspect (- (length records) 1))))
 ;display a record
-(define (inspect n)
-  (let ([element (list-ref records n)])
+(define (inspect-list n list)
+    (let ([element (list-ref list n)])
     (fprintf (current-output-port) "type:~a~ntimestamp:~a~nuser-id:~a~ndollar-amount:~a~n"
              (record-type element)(record-timestamp element)(record-user-id element)(record-dollar-amount element))))
+(define (inspect n)
+ (inspect-list n records))
 ;similar to reading bytes from a file, but works for arbitrary lists of bits
 (define (bitlist->int bitlist)
   (let ([value 0] [bits bitlist])
@@ -54,7 +56,10 @@
 (define exponent-bias 1023)
 (define (bitlist->float bitlist)
   (let ([sign (list-ref bitlist 0)] [exp (bitlist->int (list-section bitlist 1 11))] [num (list-tail bitlist 12)] )
-    (* (expt 2 (- exp exponent-bias)) (string->number (string-append* "1." (map number->string num)) 2))))
+    (* (expt -1 sign)(* (expt 2 (- exp exponent-bias)) (string->number (string-append* "1." (map number->string num)) 2)))))
+;easily sort based on payment type
+(define (payment-type type)
+  (filter (lambda (record) (= (record-type record) type)) records))
 
 ;process the header and calibrate the pointer
 (define name (subbytes in 0 4))
@@ -62,9 +67,16 @@
 (define record-num (bytes->int (subbytes in 5 9)))
 (define pointer 9)
 
-;steps
+;steps to answer the specific questions
 (fprintf (current-output-port) "Name: ~a~nVersion: ~a~nRecords: ~a~n" name version record-num)
 (define (read-all [n 0]) (when (< n record-num) (read-record in pointer) (read-all (+ 1 n))))
 (read-all)
-;(inspect 0) inspect specific records  
-
+;(inspect 0) inspect specific records
+  
+(fprintf (current-output-port) "~n~n~n~nBegining question answers:~n")
+(fprintf (current-output-port) "Total debit dollars:~a~n" (apply + (map (lambda (record) (record-dollar-amount record)) (payment-type 0))))
+(fprintf (current-output-port) "Total credit dollars:~a~n" (apply + (map (lambda (record) (record-dollar-amount record)) (payment-type 1))))
+(fprintf (current-output-port) "Total started autopays:~a~n" (length (payment-type 2)))
+(fprintf (current-output-port) "Total ended autopays:~a~n" (length (payment-type 3)))
+(fprintf (current-output-port) "Customer #2456938384156277127 has spent ~a dollars with us.~n"
+         (apply + (map (lambda (record) (record-dollar-amount record)) (filter (lambda (record) (= (record-user-id record) 2456938384156277127)) records))))
