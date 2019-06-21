@@ -31,8 +31,11 @@
 (define records (list))
 ;and create a record
 (define (read-record file pointer)
+  (let ([type (reader 1)])
   (set! records (append records (list
-                                 (record (reader 1) (reader 4) (reader 8) (bitlist->float (int->bits (reader 8))))))))
+                                 (record type (reader 4) (reader 8)
+                                         (when (or (= type 0) (= type 1)) (bitlist->float (int->bits (reader 8))))))))
+    (inspect (- (length records) 1))))
 ;display a record
 (define (inspect n)
   (let ([element (list-ref records n)])
@@ -51,9 +54,7 @@
 (define exponent-bias 1023)
 (define (bitlist->float bitlist)
   (let ([sign (list-ref bitlist 0)] [exp (bitlist->int (list-section bitlist 1 11))] [num (list-tail bitlist 12)] )
-    (fprintf (current-output-port) "sign: ~a~nexp: ~a~nint: ~a~n" sign exp num)
-    (* (expt 2 (- exp exponent-bias)) (string->number (string-append* "1." (map number->string num)) 2))
-    ))
+    (* (expt 2 (- exp exponent-bias)) (string->number (string-append* "1." (map number->string num)) 2))))
 
 ;process the header and calibrate the pointer
 (define name (subbytes in 0 4))
@@ -63,4 +64,4 @@
 
 ;steps
 (read-record in pointer)
-(inspect 0)
+;(inspect 0)
