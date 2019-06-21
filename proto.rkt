@@ -60,19 +60,16 @@
 ;easily sort based on payment type
 (define (payment-type type)
   (filter (lambda (record) (= (record-type record) type)) records))
-
 ;process the header and calibrate the pointer
 (define name (subbytes in 0 4))
 (define version (bytes->int (subbytes in 4 5)))
 (define record-num (bytes->int (subbytes in 5 9)))
 (define pointer 9)
-
 ;steps to answer the specific questions
 (fprintf (current-output-port) "Name: ~a~nVersion: ~a~nRecords: ~a~n" name version record-num)
 (define (read-all [n 0]) (when (< n record-num) (read-record in pointer) (read-all (+ 1 n))))
 (read-all)
-;(inspect 0) inspect specific records
-  
+;output answers
 (fprintf (current-output-port) "~n~n~n~nBegining question answers:~n")
 (fprintf (current-output-port) "Total debit dollars:~a~n" (apply + (map (lambda (record) (record-dollar-amount record)) (payment-type 0))))
 (fprintf (current-output-port) "Total credit dollars:~a~n" (apply + (map (lambda (record) (record-dollar-amount record)) (payment-type 1))))
